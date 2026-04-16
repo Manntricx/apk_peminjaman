@@ -16,17 +16,24 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Admin Routes
-    Route::prefix('admin')->name('admin.')->group(function () {
+    // Common Routes for Admin & Petugas
+    Route::prefix('admin')->name('admin.')->middleware('role:admin,petugas')->group(function () {
+        Route::resource('peminjamans', \App\Http\Controllers\Admin\PeminjamanController::class);
+        Route::resource('pengembalians', \App\Http\Controllers\Admin\PengembalianController::class);
+    });
+
+    // Admin Only
+    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
         Route::resource('alats', \App\Http\Controllers\Admin\AlatController::class);
-        Route::resource('peminjamans', \App\Http\Controllers\Admin\PeminjamanController::class);
-        Route::resource('pengembalians', \App\Http\Controllers\Admin\PengembalianController::class);
-        
-        // Logs
         Route::get('logs', [\App\Http\Controllers\Admin\LogAktifitasController::class, 'index'])->name('logs.index');
         Route::delete('logs/clear', [\App\Http\Controllers\Admin\LogAktifitasController::class, 'clear'])->name('logs.clear');
+    });
+
+    // Petugas Only (Operational features specifically for them)
+    Route::prefix('admin')->name('admin.')->middleware('role:petugas')->group(function () {
+        Route::get('laporan', function() { return view('admin.laporan.index'); })->name('laporan.index');
     });
 });
 
