@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Alat;
 use App\Models\DetailPeminjaman;
+use App\Models\LogAktifitas;
 use App\Models\Peminjaman;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -78,6 +79,9 @@ class PeminjamanController extends Controller
             }
 
             DB::commit();
+
+            LogAktifitas::record('Transaksi Peminjaman', "Mencatat peminjaman baru: {$peminjaman->kode_peminjaman}");
+
             return redirect()->route('admin.peminjamans.index')->with('success', 'Peminjaman berhasil dicatat.');
         } catch (\Exception $e) {
             DB::rollback();

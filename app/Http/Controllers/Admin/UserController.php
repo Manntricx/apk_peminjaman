@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogAktifitas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -31,13 +32,15 @@ class UserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'role' => $request->role,
             'password' => Hash::make($request->password),
         ]);
+
+        LogAktifitas::record('Tambah User', "Menambahkan user baru: {$user->name} ({$user->role})");
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
@@ -72,6 +75,8 @@ class UserController extends Controller
 
         $user->update($data);
 
+        LogAktifitas::record('Update User', "Memperbarui data user: {$user->name}");
+
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
 
@@ -81,7 +86,10 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
 
+        $nama = $user->name;
         $user->delete();
+        LogAktifitas::record('Hapus User', "Menghapus user: {$nama}");
+        
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LogAktifitas;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use Illuminate\Http\Request;
@@ -72,6 +73,9 @@ class PengembalianController extends Controller
             }
 
             DB::commit();
+
+            LogAktifitas::record('Transaksi Pengembalian', "Mencatat pengembalian alat untuk kode: {$peminjaman->kode_peminjaman}");
+
             return redirect()->route('admin.pengembalians.index')->with('success', 'Pengembalian berhasil dicatat dan stok telah diperbarui.');
         } catch (\Exception $e) {
             DB::rollback();

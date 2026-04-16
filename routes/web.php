@@ -23,6 +23,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('alats', \App\Http\Controllers\Admin\AlatController::class);
         Route::resource('peminjamans', \App\Http\Controllers\Admin\PeminjamanController::class);
         Route::resource('pengembalians', \App\Http\Controllers\Admin\PengembalianController::class);
+        
+        // Logs
+        Route::get('logs', [\App\Http\Controllers\Admin\LogAktifitasController::class, 'index'])->name('logs.index');
+        Route::delete('logs/clear', [\App\Http\Controllers\Admin\LogAktifitasController::class, 'clear'])->name('logs.clear');
     });
 });
 

@@ -20,4 +20,14 @@ class LogAktifitas extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public static function record($aksi, $keterangan = null)
+    {
+        return self::create([
+            'user_id' => auth()->id(),
+            'aksi' => $aksi,
+            'keterangan' => $keterangan,
+            'waktu' => now(),
+        ]);
+    }
 }
