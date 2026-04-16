@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('phone')->nullable();
-            $table->string('role');
+            $table->enum('role', ['admin', 'petugas', 'peminjam'])->default('peminjam');
             $table->timestamps();
         });
 

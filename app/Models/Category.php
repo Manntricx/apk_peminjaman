@@ -12,4 +12,9 @@ class Category extends Model
         'nama_kategori',
         'deskripsi',
     ];
+
+    public function alats()
+    {
+        return $this->hasMany(Alat::class, 'kategori_id');
+    }
 }
