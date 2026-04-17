@@ -83,8 +83,10 @@ class AlatController extends Controller
 
     public function destroy(Alat $alat)
     {
-        // Check if item is being borrowed?
-        // In a real app, we check Peminjaman where status is 'aktif'.
+        // Check if item has loan history
+        if ($alat->peminjamanDetails()->exists()) {
+            return back()->with('error', 'Gagal menghapus! Alat ini memiliki riwayat peminjaman. Anda bisa mengubah kondisi alat menjadi rusak atau tidak tersedia sebagai gantinya.');
+        }
         
         if ($alat->foto) {
             Storage::disk('public')->delete($alat->foto);

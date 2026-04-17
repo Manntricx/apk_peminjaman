@@ -8,7 +8,9 @@
                 <div class="card-title">Daftar Peminjaman</div>
                 <div class="card-subtitle">Pantau status peminjaman alat oleh pengguna</div>
             </div>
+            @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.peminjamans.create') }}" class="card-action">+ Buat Peminjaman</a>
+            @endif
         </div>
         <div class="card-body">
             @if(session('success'))
@@ -59,6 +61,7 @@
                                 $statusClass = match($pj->status) {
                                     'aktif'      => 'badge-info',
                                     'selesai'    => 'badge-success',
+                                    'ditolak'    => 'badge-danger',
                                     'terlambat'  => 'badge-danger',
                                     default      => 'badge-warning',
                                 };
@@ -67,10 +70,26 @@
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                <a href="{{ route('admin.peminjamans.show', $pj) }}" class="topbar-icon-btn" style="width: 32px; height: 32px; background: #eff6ff; color: #2563eb;" title="Detail">
+                                @if($pj->status == 'pending')
+                                <form action="{{ route(Auth::user()->role . '.peminjamans.approve', $pj) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="topbar-icon-btn" style="width: 32px; height: 32px; background: #dcfce7; color: #16a34a; border: none; cursor: pointer;" title="Setujui Peminjaman">
+                                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    </button>
+                                </form>
+                                <form action="{{ route(Auth::user()->role . '.peminjamans.reject', $pj) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="topbar-icon-btn" style="width: 32px; height: 32px; background: #fee2e2; color: #dc2626; border: none; cursor: pointer;" title="Tolak Peminjaman">
+                                        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </form>
+                                @endif
+
+                                <a href="{{ route(Auth::user()->role . '.peminjamans.show', $pj) }}" class="topbar-icon-btn" style="width: 32px; height: 32px; background: #eff6ff; color: #2563eb;" title="Detail">
                                     <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
-                                @if($pj->status != 'aktif')
+                                
+                                @if($pj->status != 'aktif' && Auth::user()->role === 'admin')
                                 <form action="{{ route('admin.peminjamans.destroy', $pj) }}" method="POST" onsubmit="return confirm('Hapus data peminjaman?')">
                                     @csrf
                                     @method('DELETE')

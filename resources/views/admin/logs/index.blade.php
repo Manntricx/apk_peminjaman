@@ -47,6 +47,10 @@
                                     str_contains($log->aksi, 'Tambah') => 'badge-success',
                                     str_contains($log->aksi, 'Hapus') => 'badge-danger',
                                     str_contains($log->aksi, 'Update') => 'badge-warning',
+                                    str_contains($log->aksi, 'Permohonan') => 'badge-warning',
+                                    str_contains($log->aksi, 'Pengembalian') => 'badge-success',
+                                    str_contains($log->aksi, 'Persetujuan') => 'badge-info',
+                                    str_contains($log->aksi, 'Penolakan') => 'badge-danger',
                                     str_contains($log->aksi, 'Transaksi') => 'badge-info',
                                     default => 'badge-info'
                                 };

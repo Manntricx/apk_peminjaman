@@ -22,4 +22,9 @@ class Alat extends Model
     {
         return $this->belongsTo(Category::class, 'kategori_id');
     }
+
+    public function peminjamanDetails()
+    {
+        return $this->hasMany(DetailPeminjaman::class, 'alat_id');
+    }
 }

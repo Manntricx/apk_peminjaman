@@ -9,7 +9,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $pageTitle }} – {{ config('app.name', 'SiPinjam') }}</title>
+    <title>{{ $pageTitle }} – {{ config('app.name', 'Solang') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -178,7 +178,7 @@
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-        <div class="sidebar-brand-title">Si<span>Pinjam</span></div>
+        <div class="sidebar-brand-title">So<span>lang</span></div>
         <div class="sidebar-brand-sub">Sistem Manajemen Peminjaman</div>
     </div>
     <div class="sidebar-user">
@@ -227,17 +227,37 @@
 
         @if(Auth::user()->role === 'petugas')
             <div class="nav-section-label">Operasional</div>
-            <a href="{{ route('admin.peminjamans.index') }}" class="nav-item {{ request()->routeIs('admin.peminjamans*') ? 'active' : '' }}">
+            <a href="{{ route('petugas.peminjamans.index') }}" class="nav-item {{ request()->routeIs('petugas.peminjamans*') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 Menyetujui Peminjaman
             </a>
-            <a href="{{ route('admin.pengembalians.index') }}" class="nav-item {{ request()->routeIs('admin.pengembalians*') ? 'active' : '' }}">
+            <a href="{{ route('petugas.pengembalians.index') }}" class="nav-item {{ request()->routeIs('petugas.pengembalians*') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 Memantau Pengembalian
             </a>
-            <a href="#" class="nav-item {{ request()->routeIs('admin.laporan*') ? 'active' : '' }}">
+            <a href="{{ route('petugas.laporan.index') }}" class="nav-item {{ request()->routeIs('petugas.laporan*') ? 'active' : '' }}">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                 Mencetak Laporan
+            </a>
+        @endif
+
+        @if(Auth::user()->role === 'peminjam')
+            <div class="nav-section-label">Layanan Saya</div>
+            <a href="{{ route('peminjam.dashboard') }}" class="nav-item {{ request()->routeIs('peminjam.dashboard') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                Beranda Portal
+            </a>
+            <a href="{{ route('peminjam.alats') }}" class="nav-item {{ request()->routeIs('peminjam.alats') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Daftar Alat
+            </a>
+            <a href="{{ route('peminjam.peminjamans.index') }}" class="nav-item {{ request()->routeIs('peminjam.peminjamans*') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Peminjaman Saya
+            </a>
+            <a href="{{ route('peminjam.pengembalians.index') }}" class="nav-item {{ request()->routeIs('peminjam.pengembalians*') ? 'active' : '' }}">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                Kembalikan Alat
             </a>
         @endif
     </nav>

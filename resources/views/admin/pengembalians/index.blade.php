@@ -8,7 +8,9 @@
                 <div class="card-title">Daftar Pengembalian</div>
                 <div class="card-subtitle">Riwayat alat yang sudah dikembalikan oleh peminjam</div>
             </div>
+            @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.pengembalians.create') }}" class="card-action" style="background: #16a34a; color: #fff;">+ Proses Pengembalian</a>
+            @endif
         </div>
         <div class="card-body">
             @if(session('success'))
@@ -37,7 +39,7 @@
                         </td>
                         <td>
                             <div style="font-weight: 600; color: #0f172a;">{{ $pg->peminjaman->peminjam->name }}</div>
-                            <div style="font-size: 0.75rem; color: #94a3b8;">Diterima: {{ $pg->petugas->name }}</div>
+                            <div style="font-size: 0.75rem; color: #94a3b8;">Oleh: {{ $pg->petugas ? $pg->petugas->name : 'Mandiri (Peminjam)' }}</div>
                         </td>
                         <td>
                             <div style="font-size: 0.85rem; color: #16a34a; font-weight: 600;">
@@ -57,7 +59,7 @@
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                <a href="{{ route('admin.pengembalians.show', $pg) }}" class="topbar-icon-btn" style="width: 32px; height: 32px; background: #f1f5f9; color: #475569;" title="Lihat Detail">
+                                <a href="{{ route(Auth::user()->role . '.pengembalians.show', $pg) }}" class="topbar-icon-btn" style="width: 32px; height: 32px; background: #f1f5f9; color: #475569;" title="Lihat Detail">
                                     <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
                             </div>

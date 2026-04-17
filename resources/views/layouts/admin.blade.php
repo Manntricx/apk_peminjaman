@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Admin Panel – {{ config('app.name', 'SiPinjam') }}</title>
+    <title>Admin Panel – {{ config('app.name', 'Solang') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -261,7 +261,7 @@
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-        <div class="sidebar-brand-title">Si<span>Pinjam</span></div>
+        <div class="sidebar-brand-title">So<span>lang</span></div>
         <div class="sidebar-brand-sub">Sistem Manajemen Peminjaman</div>
     </div>
 

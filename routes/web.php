@@ -8,6 +8,9 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    if (auth()->check() && auth()->user()->role === 'peminjam') {
+        return redirect()->route('peminjam.dashboard');
+    }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -16,25 +19,50 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Common Routes for Admin & Petugas
-    Route::prefix('admin')->name('admin.')->middleware('role:admin,petugas')->group(function () {
-        Route::resource('peminjamans', \App\Http\Controllers\Admin\PeminjamanController::class);
-        Route::resource('pengembalians', \App\Http\Controllers\Admin\PengembalianController::class);
-    });
-
-    // Admin Only
+    // ============================================================
+    // ADMIN — Full CRUD + Logs
+    // ============================================================
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
         Route::resource('alats', \App\Http\Controllers\Admin\AlatController::class);
+        Route::resource('peminjamans', \App\Http\Controllers\Admin\PeminjamanController::class);
+        Route::post('peminjamans/{peminjaman}/approve', [\App\Http\Controllers\Admin\PeminjamanController::class, 'approve'])->name('peminjamans.approve');
+        Route::resource('pengembalians', \App\Http\Controllers\Admin\PengembalianController::class);
         Route::get('logs', [\App\Http\Controllers\Admin\LogAktifitasController::class, 'index'])->name('logs.index');
         Route::delete('logs/clear', [\App\Http\Controllers\Admin\LogAktifitasController::class, 'clear'])->name('logs.clear');
     });
 
-    // Petugas Only (Operational features specifically for them)
-    Route::prefix('admin')->name('admin.')->middleware('role:petugas')->group(function () {
-        Route::get('laporan', function() { return view('admin.laporan.index'); })->name('laporan.index');
+    // ============================================================
+    // PETUGAS — Approve Peminjaman, Pantau Pengembalian, Laporan, Log
+    // ============================================================
+    Route::prefix('petugas')->name('petugas.')->middleware('role:petugas')->group(function () {
+        // Menyetujui Peminjaman (list + detail + approve action)
+        Route::get('peminjamans', [\App\Http\Controllers\Admin\PeminjamanController::class, 'index'])->name('peminjamans.index');
+        Route::get('peminjamans/{peminjaman}', [\App\Http\Controllers\Admin\PeminjamanController::class, 'show'])->name('peminjamans.show');
+        Route::post('peminjamans/{peminjaman}/approve', [\App\Http\Controllers\Admin\PeminjamanController::class, 'approve'])->name('peminjamans.approve');
+        Route::post('peminjamans/{peminjaman}/reject', [\App\Http\Controllers\Admin\PeminjamanController::class, 'reject'])->name('peminjamans.reject');
+        Route::delete('peminjamans/{peminjaman}', [\App\Http\Controllers\Admin\PeminjamanController::class, 'destroy'])->name('peminjamans.destroy');
+        // Memantau Pengembalian (list + detail only)
+        Route::get('pengembalians', [\App\Http\Controllers\Admin\PengembalianController::class, 'index'])->name('pengembalians.index');
+        Route::get('pengembalians/{pengembalian}', [\App\Http\Controllers\Admin\PengembalianController::class, 'show'])->name('pengembalians.show');
+        // Mencetak Laporan
+        Route::get('laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    });
+
+    // ============================================================
+    // PEMINJAM — Landing portal with dedicated controller
+    // ============================================================
+    Route::prefix('peminjam')->name('peminjam.')->middleware('role:peminjam')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'dashboard'])->name('dashboard');
+        Route::get('alats', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'alats'])->name('alats');
+        Route::get('peminjamans', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'peminjamansIndex'])->name('peminjamans.index');
+        Route::get('peminjamans/create', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'peminjamansCreate'])->name('peminjamans.create');
+        Route::post('peminjamans', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'peminjamansStore'])->name('peminjamans.store');
+        Route::get('pengembalians', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'pengembalianIndex'])->name('pengembalians.index');
+        Route::post('pengembalians', [\App\Http\Controllers\Peminjam\PeminjamController::class, 'pengembalianStore'])->name('pengembalians.store');
     });
 });
 
 require __DIR__.'/auth.php';
+

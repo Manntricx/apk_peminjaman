@@ -9,7 +9,7 @@
                     <div class="card-title">Form Peminjaman Baru</div>
                     <div class="card-subtitle">Input detail peminjaman alat untuk pengguna</div>
                 </div>
-                <a href="{{ route('admin.peminjamans.index') }}" class="card-action" style="background: #f1f5f9; color: #64748b;">Kembali</a>
+                <a href="{{ route(Auth::user()->role . '.peminjamans.index') }}" class="card-action" style="background: #f1f5f9; color: #64748b;">Kembali</a>
             </div>
             <div class="card-body">
                 <form action="{{ route('admin.peminjamans.store') }}" method="POST">
@@ -24,6 +24,7 @@
                         </div>
 
                         {{-- Peminjam --}}
+                        @if(Auth::user()->role !== 'peminjam')
                         <div>
                             <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #334155; margin-bottom: 8px;">Pilih Peminjam (User)</label>
                             <select name="peminjam_id" required 
@@ -34,6 +35,15 @@
                                 @endforeach
                             </select>
                         </div>
+                        @else
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; font-weight: 600; color: #334155; margin-bottom: 8px;">Peminjam</label>
+                            <div style="padding: 10px 14px; background: #f1f5f9; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #475569;">
+                                {{ Auth::user()->name }} (Saya)
+                            </div>
+                            <input type="hidden" name="peminjam_id" value="{{ Auth::id() }}">
+                        </div>
+                        @endif
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">

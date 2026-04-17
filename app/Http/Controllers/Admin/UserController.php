@@ -86,6 +86,11 @@ class UserController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
 
+        // Check if user has transaction history
+        if ($user->peminjamans()->exists() || $user->petugasPeminjamans()->exists()) {
+            return back()->with('error', "Gagal menghapus! User '{$user->name}' memiliki riwayat transaksi peminjaman. Anda bisa mengubah status atau role-nya saja.");
+        }
+
         $nama = $user->name;
         $user->delete();
         LogAktifitas::record('Hapus User', "Menghapus user: {$nama}");

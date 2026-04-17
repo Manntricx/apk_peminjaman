@@ -15,7 +15,13 @@ class PeminjamanController extends Controller
 {
     public function index()
     {
-        $peminjamans = Peminjaman::with(['peminjam', 'petugas'])->latest()->paginate(10);
+        $query = Peminjaman::with(['peminjam', 'petugas']);
+        
+        if (auth()->user()->role === 'peminjam') {
+            $query->where('peminjam_id', auth()->id());
+        }
+
+        $peminjamans = $query->latest()->paginate(10);
         return view('admin.peminjamans.index', compact('peminjamans'));
     }
 
@@ -34,9 +40,8 @@ class PeminjamanController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validationRules = [
             'kode_peminjaman' => 'required|unique:peminjaman,kode_peminjaman',
-            'peminjam_id' => 'required|exists:users,id',
             'tgl_pinjam' => 'required|date',
             'tgl_kembali_rencana' => 'required|date|after_or_equal:tgl_pinjam',
             'alat_id' => 'required|array|min:1',
@@ -44,18 +49,27 @@ class PeminjamanController extends Controller
             'jumlah' => 'required|array|min:1',
             'jumlah.*' => 'integer|min:1',
             'keterangan' => 'nullable|string',
-        ]);
+        ];
+
+        if (auth()->user()->role !== 'peminjam') {
+            $validationRules['peminjam_id'] = 'required|exists:users,id';
+        }
+
+        $request->validate($validationRules);
 
         try {
             DB::beginTransaction();
 
+            $status = (auth()->user()->role === 'peminjam') ? 'pending' : 'aktif';
+            $peminjamId = (auth()->user()->role === 'peminjam') ? auth()->id() : $request->peminjam_id;
+
             $peminjaman = Peminjaman::create([
                 'kode_peminjaman' => $request->kode_peminjaman,
-                'peminjam_id' => $request->peminjam_id,
-                'petugas_id' => auth()->id(),
+                'peminjam_id' => $peminjamId,
+                'petugas_id' => (auth()->user()->role === 'peminjam') ? null : auth()->id(),
                 'tgl_pinjam' => $request->tgl_pinjam,
                 'tgl_kembali_rencana' => $request->tgl_kembali_rencana,
-                'status' => 'aktif',
+                'status' => $status,
                 'keterangan' => $request->keterangan,
             ]);
 
@@ -98,10 +112,75 @@ class PeminjamanController extends Controller
     public function destroy(Peminjaman $peminjaman)
     {
         if ($peminjaman->status == 'aktif') {
-            return back()->with('error', 'Peminjaman aktif tidak dapat dihapus. Silakan lakukan pengembalian terlebih dahulu.');
+            return back()->with('error', 'Peminjaman aktif tidak dapat dihapus. Silakan lakukan pengembalian terlebih dahulu agar stok kembali normal.');
         }
 
-        $peminjaman->delete();
-        return redirect()->route('admin.peminjamans.index')->with('success', 'Data peminjaman berhasil dihapus.');
+        try {
+            DB::beginTransaction();
+
+            // Hapus detail peminjaman & pengembalian terkait (Foreign Key)
+            $peminjaman->details()->delete();
+            $peminjaman->pengembalian()->delete();
+
+            $peminjaman->delete();
+
+            DB::commit();
+            return redirect()->route('admin.peminjamans.index')->with('success', 'Data peminjaman berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal menghapus: ' . $e->getMessage());
+        }
+    }
+
+    public function approve(Peminjaman $peminjaman)
+    {
+        if ($peminjaman->status !== 'pending') {
+            return back()->with('error', 'Hanya peminjaman dengan status pending yang bisa disetujui.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $peminjaman->load('details.alat');
+
+            foreach ($peminjaman->details as $detail) {
+                if ($detail->alat->stok_tersedia < $detail->jumlah) {
+                    throw new \Exception("Stok alat '{$detail->alat->nama_alat}' tidak mencukupi untuk peminjaman ini.");
+                }
+
+                // Potong stok
+                $detail->alat->decrement('stok_tersedia', $detail->jumlah);
+            }
+
+            $peminjaman->update([
+                'status' => 'aktif',
+                'petugas_id' => auth()->id(),
+            ]);
+
+            DB::commit();
+
+            LogAktifitas::record('Persetujuan Peminjaman', "Menyetujui peminjaman: {$peminjaman->kode_peminjaman}");
+
+            return redirect()->route(auth()->user()->role . '.peminjamans.index')->with('success', "Peminjaman {$peminjaman->kode_peminjaman} telah disetujui.");
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Gagal menyetujui peminjaman: ' . $e->getMessage());
+        }
+    }
+
+    public function reject(Peminjaman $peminjaman)
+    {
+        if ($peminjaman->status !== 'pending') {
+            return back()->with('error', 'Hanya peminjaman dengan status pending yang bisa ditolak.');
+        }
+
+        $peminjaman->update([
+            'status' => 'ditolak',
+            'petugas_id' => auth()->id(),
+        ]);
+
+        LogAktifitas::record('Penolakan Peminjaman', "Menolak peminjaman: {$peminjaman->kode_peminjaman}");
+
+        return redirect()->route(auth()->user()->role . '.peminjamans.index')->with('success', "Peminjaman {$peminjaman->kode_peminjaman} telah ditolak.");
     }
 }

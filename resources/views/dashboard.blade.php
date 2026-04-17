@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Dashboard {{ ucfirst(Auth::user()->role) }}</x-slot>
-    <x-slot name="pageBreadcrumb">SiPinjam / Main / Dashboard</x-slot>
+    <x-slot name="pageBreadcrumb">Solang / Main / Dashboard</x-slot>
 
     {{-- ===== KPI STATS ===== --}}
     <div class="stats-grid">
@@ -49,7 +49,7 @@
                     <div class="stat-trend neutral">Audit trail</div>
                 </div>
             </div>
-        @else
+        @elseif(Auth::user()->role === 'petugas')
             <!-- Petugas View -->
             <div class="stat-card">
                 <div class="stat-icon orange">
@@ -81,6 +81,8 @@
                     <div class="stat-trend up">Sudah kembali</div>
                 </div>
             </div>
+        @elseif(Auth::user()->role === 'peminjam')
+            <!-- Peminjam View -->
             <div class="stat-card">
                 <div class="stat-icon blue">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0h-3.586a1 1 0 00-.707.293l-2.707 2.707a1 1 0 01-.707.293H10.586a1 1 0 01-.707-.293L7.172 13.293a1 1 0 00-.707-.293H3"/></svg>
@@ -88,7 +90,27 @@
                 <div>
                     <div class="stat-value">{{ \App\Models\Alat::where('stok_tersedia', '>', 0)->count() }}</div>
                     <div class="stat-label">Alat Siap Pinjam</div>
-                    <div class="stat-trend blue">Ready in stock</div>
+                    <div class="stat-trend blue">Tersedia</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ \App\Models\Peminjaman::where('peminjam_id', Auth::id())->where('status', 'aktif')->count() }}</div>
+                    <div class="stat-label">Pinjaman Aktif</div>
+                    <div class="stat-trend orange">Sedang dipinjam</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <div class="stat-value">{{ \App\Models\Peminjaman::where('peminjam_id', Auth::id())->where('status', 'aktif')->where('tgl_kembali_rencana', '<', date('Y-m-d'))->count() }}</div>
+                    <div class="stat-label">Terlambat</div>
+                    <div class="stat-trend red">Perlu Kembali</div>
                 </div>
             </div>
         @endif
@@ -101,15 +123,21 @@
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">Peminjaman Terbaru</div>
-                    <div class="card-subtitle">Transaksi terakhir di sistem</div>
+                    <div class="card-title">@if(Auth::user()->role === 'peminjam') Pinjaman Saya @else Peminjaman Terbaru @endif</div>
+                    <div class="card-subtitle">Histori transaksi terakhir</div>
                 </div>
-                @if(Auth::user()->role === 'petugas')
-                    <a href="{{ route('admin.peminjamans.index') }}" class="card-action">Lihat Semua →</a>
+                @if(Auth::user()->role === 'peminjam')
+                    <a href="{{ route('peminjam.peminjamans.index') }}" class="card-action">Lihat Semua →</a>
+                @else
+                    <a href="{{ Auth::user()->role === 'admin' ? route('admin.peminjamans.index') : route('petugas.peminjamans.index') }}" class="card-action">Lihat Semua →</a>
                 @endif
             </div>
             <div class="card-body">
-                @php $pinjaman = \App\Models\Peminjaman::with('peminjam')->latest()->take(5)->get(); @endphp
+                @php 
+                    $query = \App\Models\Peminjaman::with('peminjam'); 
+                    if(Auth::user()->role === 'peminjam') $query->where('peminjam_id', Auth::id());
+                    $pinjaman = $query->latest()->take(5)->get(); 
+                @endphp
                 @if($pinjaman->isEmpty())
                     <div style="text-align:center; padding: 40px 0; color: #94a3b8;">
                         <svg style="width:40px;height:40px;margin:0 auto 10px;display:block;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -120,7 +148,7 @@
                         <thead>
                             <tr>
                                 <th>Kode</th>
-                                <th>Peminjam</th>
+                                @if(Auth::user()->role !== 'peminjam') <th>Peminjam</th> @endif
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -128,7 +156,7 @@
                             @foreach($pinjaman as $item)
                             <tr>
                                 <td style="font-weight:600; color:#1d4ed8;">{{ $item->kode_peminjaman }}</td>
-                                <td>{{ optional($item->peminjam)->name }}</td>
+                                @if(Auth::user()->role !== 'peminjam') <td>{{ optional($item->peminjam)->name }}</td> @endif
                                 <td>
                                     @php
                                         $statusClass = match($item->status) {
@@ -179,33 +207,46 @@
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 <span class="quick-btn-label">Log</span>
                             </a>
-                        @else
-                            <a href="{{ route('admin.peminjamans.create') }}" class="quick-btn orange">
+                        @elseif(Auth::user()->role === 'petugas')
+                            <a href="{{ route('petugas.peminjamans.index') }}" class="quick-btn orange">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                 <span class="quick-btn-label">Persetujuan</span>
                             </a>
-                            <a href="{{ route('admin.pengembalians.create') }}" class="quick-btn teal">
+                            <a href="{{ route('petugas.pengembalians.index') }}" class="quick-btn teal">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                <span class="quick-btn-label">Pengembalian</span>
+                                <span class="quick-btn-label">Pantau Kembalian</span>
                             </a>
-                            <a href="#" class="quick-btn blue">
+                            <a href="{{ route('petugas.laporan.index') }}" class="quick-btn blue">
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                 <span class="quick-btn-label">Cetak Laporan</span>
+                            </a>
+                        @elseif(Auth::user()->role === 'peminjam')
+                            <a href="{{ route('peminjam.alats') }}" class="quick-btn blue">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <span class="quick-btn-label">Daftar Alat</span>
+                            </a>
+                            <a href="{{ route('peminjam.peminjamans.create') }}" class="quick-btn orange">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                <span class="quick-btn-label">Ajukan Pinjam</span>
+                            </a>
+                            <a href="{{ route('peminjam.pengembalians.index') }}" class="quick-btn green">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span class="quick-btn-label">Riwayat & Kembali</span>
                             </a>
                         @endif
                     </div>
                 </div>
             </div>
 
-            {{-- Log Aktifitas / Last Actions --}}
+            {{-- Info Box --}}
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Informasi Sistem</div>
+                    <div class="card-title">Informasi Akun</div>
                 </div>
                 <div class="card-body">
                     <div style="font-size:0.8rem; color:#475569; line-height:1.6;">
-                        Selamat datang kembali, <strong>{{ Auth::user()->name }}</strong>.<br>
-                        Gunakan menu di sidebar untuk mengelola sistem sesuai hak akses Anda.
+                        Halo, <strong>{{ Auth::user()->name }}</strong>.<br>
+                        Gunakan portal ini untuk melakukan peminjaman alat secara mandiri.
                     </div>
                 </div>
             </div>

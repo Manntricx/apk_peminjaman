@@ -15,7 +15,7 @@ class RoleMiddleware
      */
     public function handle(Request $request, Closure $next, string $roles): Response
     {
-        $roleArray = explode(',', $roles);
+        $roleArray = array_map('trim', explode(',', $roles));
 
         if (!$request->user() || !in_array($request->user()->role, $roleArray)) {
             abort(403, 'Anda tidak memiliki hak akses untuk halaman ini.');

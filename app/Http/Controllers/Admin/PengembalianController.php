@@ -13,7 +13,15 @@ class PengembalianController extends Controller
 {
     public function index()
     {
-        $pengembalians = Pengembalian::with(['peminjaman.peminjam', 'petugas'])->latest()->paginate(10);
+        $query = Pengembalian::with(['peminjaman.peminjam', 'petugas']);
+        
+        if (auth()->user()->role === 'peminjam') {
+            $query->whereHas('peminjaman', function($q) {
+                $q->where('peminjam_id', auth()->id());
+            });
+        }
+
+        $pengembalians = $query->latest()->paginate(10);
         return view('admin.pengembalians.index', compact('pengembalians'));
     }
 
@@ -22,11 +30,16 @@ class PengembalianController extends Controller
         $peminjamanId = $request->query('peminjaman_id');
         $peminjaman = null;
         
-        if ($peminjamanId) {
-            $peminjaman = Peminjaman::with('details.alat')->where('status', 'aktif')->findOrFail($peminjamanId);
+        $loanQuery = Peminjaman::where('status', 'aktif');
+        if (auth()->user()->role === 'peminjam') {
+            $loanQuery->where('peminjam_id', auth()->id());
         }
 
-        $activeLoans = Peminjaman::with('peminjam')->where('status', 'aktif')->get();
+        if ($peminjamanId) {
+            $peminjaman = (clone $loanQuery)->with('details.alat')->findOrFail($peminjamanId);
+        }
+
+        $activeLoans = (clone $loanQuery)->with('peminjam')->get();
 
         return view('admin.pengembalians.create', compact('peminjaman', 'activeLoans'));
     }
