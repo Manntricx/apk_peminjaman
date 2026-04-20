@@ -1,101 +1,152 @@
 <x-peminjam-layout>
     <x-slot name="pageTitle">Pengembalian Alat</x-slot>
 
-    <div class="page-header">
+    <style>
+        .page-hdr { margin-bottom: 24px; }
+        .page-hdr h1 { font-size: 1.4rem; font-weight: 800; color: #e8eeff; letter-spacing: -0.5px; }
+        .page-hdr p  { font-size: 0.82rem; color: #4e6080; margin-top: 3px; }
+
+        /* Return Form Card */
+        .return-card { border-top: 3px solid #34d399; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; }
+        .form-submit { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+        /* All-Clear Card */
+        .clear-card {
+            background: rgba(16,185,129,0.06);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 16px; padding: 28px 24px;
+            display: flex; align-items: center; gap: 18px;
+            margin-bottom: 24px;
+        }
+        .clear-icon {
+            width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+            background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.2);
+            display: flex; align-items: center; justify-content: center; color: #34d399;
+        }
+        .clear-icon svg { width: 24px; height: 24px; }
+        .clear-info { flex: 1; }
+        .clear-info h3 { font-size: 0.95rem; font-weight: 700; color: #e8eeff; margin-bottom: 4px; }
+        .clear-info p  { font-size: 0.82rem; color: #4e6080; }
+
+        /* History Table */
+        .ref-mono { font-family: 'Courier New', monospace; font-weight: 700; color: #60a5fa; font-size: 0.8rem; }
+        .item-name { font-weight: 600; color: #e8eeff; font-size: 0.855rem; }
+        .item-more { font-size: 0.72rem; color: #3d5270; font-style: italic; margin-top: 2px; }
+        .date-green { color: #34d399; font-weight: 600; font-size: 0.82rem; }
+        .note-cell  { font-size: 0.8rem; color: #4e6080; max-width: 200px; }
+        .pagi-wrap  { padding: 16px 22px; border-top: 1px solid rgba(59,130,246,0.08); }
+
+        .empty-simple { text-align: center; padding: 48px 24px; color: #3d5270; }
+        .empty-simple svg { width: 42px; height: 42px; margin: 0 auto 12px; opacity: 0.35; display: block; }
+        .empty-simple p { font-size: 0.85rem; }
+
+        /* Kondisi Badges */
+        .badge-baik      { background: rgba(16,185,129,0.14); color: #34d399; border: 1px solid rgba(16,185,129,0.28); }
+        .badge-perbaikan { background: rgba(245,158,11,0.14); color: #fbbf24; border: 1px solid rgba(245,158,11,0.28); }
+        .badge-rusak     { background: rgba(239,68,68,0.14);  color: #f87171;  border: 1px solid rgba(239,68,68,0.28); }
+    </style>
+
+    {{-- Page Header --}}
+    <div class="page-hdr">
         <h1>Pengembalian Alat</h1>
-        <p>Proses pengembalian peralatan yang telah Anda pinjam dan lihat riwayat pengembalian Anda.</p>
+        <p>Proses pengembalian peralatan yang telah Anda pinjam dan lihat riwayat pengembalian.</p>
     </div>
 
+    {{-- Flash --}}
     @if(session('success'))
         <div class="alert alert-success">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span>{{ session('success') }}</span>
+            {{ session('success') }}
         </div>
     @endif
     @if(session('error'))
         <div class="alert alert-error">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span>{{ session('error') }}</span>
+            {{ session('error') }}
         </div>
     @endif
 
-    {{-- FORM PENGEMBALIAN --}}
+    {{-- ═══ FORM / ALL-CLEAR ══════════════════════════ --}}
     @if($pinjamanAktif->isNotEmpty())
-    <div class="card" style="border-top: 4px solid var(--success);">
-        <div class="card-header">
-            <h2 class="card-title">Proses Pengembalian Baru</h2>
-        </div>
-        <div class="card-body">
-            <form action="{{ route('peminjam.pengembalians.store') }}" method="POST">
-                @csrf
-
-                <div class="form-group">
-                    <label class="form-label" for="peminjaman_id">Pilih Peminjaman</label>
-                    <select name="peminjaman_id" id="peminjaman_id" required class="form-control">
-                        <option value="" disabled selected>Pilih referensi peminjaman Anda...</option>
-                        @foreach($pinjamanAktif as $pj)
-                        <option value="{{ $pj->id }}">
-                            #{{ $pj->kode_peminjaman }} [ 
-                            @foreach($pj->details as $d) {{ $d->alat->nama_alat }} ({{ $d->jumlah }}) @if(!$loop->last), @endif @endforeach
-                            ] — Batas: {{ \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->format('d M Y') }}
-                        </option>
-                        @endforeach
-                    </select>
+        <div class="card return-card">
+            <div class="card-header">
+                <div>
+                    <div class="card-title">Proses Pengembalian Baru</div>
+                    <div class="card-subtitle">Pilih peminjaman aktif yang ingin Anda kembalikan</div>
                 </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+            </div>
+            <div class="card-body">
+                <form action="{{ route('peminjam.pengembalians.store') }}" method="POST">
+                    @csrf
                     <div class="form-group">
-                        <label class="form-label" for="tgl_pengembalian">Tanggal Pengembalian</label>
-                        <input type="date" name="tgl_pengembalian" id="tgl_pengembalian" value="{{ date('Y-m-d') }}" required class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="kondisi">Kondisi Alat</label>
-                        <select name="kondisi" id="kondisi" required class="form-control">
-                            <option value="baik">Sangat Baik (Tanpa Masalah)</option>
-                            <option value="perbaikan">Perlu Perbaikan (Ada Masalah Kecil)</option>
-                            <option value="rusak">Rusak Total / Tidak Berfungsi</option>
+                        <label class="form-label" for="peminjaman_id">Pilih Peminjaman Aktif</label>
+                        <select name="peminjaman_id" id="peminjaman_id" required class="form-control">
+                            <option value="" disabled selected>Pilih referensi peminjaman Anda…</option>
+                            @foreach($pinjamanAktif as $pj)
+                            <option value="{{ $pj->id }}">
+                                {{ $pj->kode_peminjaman }} —
+                                @foreach($pj->details as $d){{ $d->alat->nama_alat }} ({{ $d->jumlah }})@if(!$loop->last), @endif @endforeach
+                                — Batas: {{ \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->format('d M Y') }}
+                            </option>
+                            @endforeach
                         </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="catatan">Catatan / Kondisi Terakhir (Opsional)</label>
-                    <textarea name="catatan" id="catatan" rows="3" placeholder="Contoh: Alat bekerja dengan baik, tidak ada kendala." class="form-control" style="resize: vertical;"></textarea>
-                </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="tgl_pengembalian">Tanggal Pengembalian</label>
+                            <input type="date" name="tgl_pengembalian" id="tgl_pengembalian" value="{{ date('Y-m-d') }}" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="kondisi">Kondisi Alat Dikembalikan</label>
+                            <select name="kondisi" id="kondisi" required class="form-control">
+                                <option value="baik">Sangat Baik (Tanpa Masalah)</option>
+                                <option value="perbaikan">Perlu Perbaikan (Ada Masalah Kecil)</option>
+                                <option value="rusak">Rusak / Tidak Berfungsi</option>
+                            </select>
+                        </div>
+                    </div>
 
-                <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
-                    <button type="submit" class="btn btn-primary" onclick="return confirm('Apakah Anda yakin ingin melakukan pengembalian ini?')">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Konfirmasi Pengembalian
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-    @else
-        <div class="card" style="background: #f1f5f9; border: none;">
-            <div class="card-body" style="padding: 32px; display: flex; align-items: center; gap: 20px;">
-                <div style="width: 48px; height: 48px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; flex-shrink: 0;">
-                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <div style="flex: 1;">
-                    <h3 style="font-size: 1rem; font-weight: 700;">Semua Alat Telah Dikembalikan</h3>
-                    <p style="font-size: 0.875rem; color: #64748b;">Anda tidak memiliki peminjaman aktif saat ini. Bagus!</p>
-                </div>
-                <a href="{{ route('peminjam.alats') }}" class="btn btn-primary btn-sm">Pinjam Alat Baru</a>
+                    <div class="form-group">
+                        <label class="form-label" for="catatan">Catatan (Opsional)</label>
+                        <textarea name="catatan" id="catatan" rows="3" placeholder="Contoh: Alat berfungsi dengan baik, tidak ada kendala." class="form-control" style="resize: vertical;"></textarea>
+                    </div>
+
+                    <div class="form-submit">
+                        <button type="submit" class="btn btn-primary" onclick="return confirm('Konfirmasi: Anda yakin ingin memproses pengembalian ini?')">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Konfirmasi Pengembalian
+                        </button>
+                    </div>
+                </form>
             </div>
+        </div>
+    @else
+        <div class="clear-card">
+            <div class="clear-icon">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="clear-info">
+                <h3>Semua Alat Telah Dikembalikan ✓</h3>
+                <p>Anda tidak memiliki peminjaman aktif saat ini. Terima kasih!</p>
+            </div>
+            <a href="{{ route('peminjam.alats') }}" class="btn btn-primary btn-sm">Pinjam Alat Baru</a>
         </div>
     @endif
 
-    {{-- RIWAYAT PENGEMBALIAN --}}
-    <div class="card" style="margin-top: 32px;">
+    {{-- ═══ HISTORY ════════════════════════════════════ --}}
+    <div class="card">
         <div class="card-header">
-            <h2 class="card-title">Riwayat Pengembalian</h2>
+            <div>
+                <div class="card-title">Riwayat Pengembalian</div>
+                <div class="card-subtitle">Semua pengembalian yang telah diproses</div>
+            </div>
         </div>
         <div class="card-body" style="padding: 0;">
             @if($pengembalians->isEmpty())
-                <div style="text-align: center; padding: 48px 24px; color: #94a3b8;">
-                    <svg style="width: 48px; height: 48px; margin: 0 auto 16px; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="empty-simple">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     <p>Belum ada riwayat pengembalian.</p>
                 </div>
             @else
@@ -113,35 +164,30 @@
                         <tbody>
                             @foreach($pengembalians as $pg)
                             <tr>
-                                <td style="font-family: monospace; font-weight: 700; color: var(--primary);">#{{ $pg->peminjaman->kode_peminjaman }}</td>
+                                <td><span class="ref-mono">{{ $pg->peminjaman->kode_peminjaman }}</span></td>
                                 <td>
                                     @foreach($pg->peminjaman->details->take(2) as $d)
-                                        <div style="font-weight: 600; font-size: 0.875rem;">{{ $d->alat->nama_alat }}</div>
+                                        <div class="item-name">{{ $d->alat->nama_alat }}</div>
                                     @endforeach
                                     @if($pg->peminjaman->details->count() > 2)
-                                        <div style="font-size: 0.75rem; color: #94a3b8;">+{{ $pg->peminjaman->details->count() - 2 }} item lainnya</div>
+                                        <div class="item-more">+{{ $pg->peminjaman->details->count() - 2 }} lainnya</div>
                                     @endif
                                 </td>
-                                <td>
-                                    <div style="font-weight: 600; color: var(--success);">{{ \Carbon\Carbon::parse($pg->tgl_pengembalian)->format('d M Y') }}</div>
-                                </td>
+                                <td><span class="date-green">{{ \Carbon\Carbon::parse($pg->tgl_pengembalian)->format('d M Y') }}</span></td>
                                 <td>
                                     <span class="badge badge-{{ $pg->kondisi }}">{{ ucfirst($pg->kondisi) }}</span>
                                 </td>
-                                <td style="font-size: 0.8125rem; color: #64748b; max-width: 250px;">
-                                    {{ $pg->catatan ?: '—' }}
-                                </td>
+                                <td class="note-cell">{{ $pg->catatan ?: '—' }}</td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
+                @if($pengembalians->total() > $pengembalians->perPage())
+                    <div class="pagi-wrap">{{ $pengembalians->links() }}</div>
+                @endif
             @endif
         </div>
-        @if($pengembalians->total() > $pengembalians->perPage())
-            <div style="padding: 20px 24px; border-top: 1px solid #f1f5f9;">
-                {{ $pengembalians->links() }}
-            </div>
-        @endif
     </div>
+
 </x-peminjam-layout>

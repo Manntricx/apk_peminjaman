@@ -30,14 +30,13 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
-            'captcha' => ['required', 'numeric', function ($attribute, $value, $fail) {
-                if ($value != session('captcha_result')) {
-                    $fail('Jawaban verifikasi keamanan (captcha) salah.');
+            'captcha' => ['required', 'string', function ($attribute, $value, $fail) {
+                if (strtoupper($value) !== session('captcha_code')) {
+                    $fail('Kode verifikasi (captcha) yang Anda masukkan salah.');
                     
-                    // Reset captcha so it can't be brute forced easily
-                    $num1 = rand(1, 10);
-                    $num2 = rand(1, 10);
-                    session(['captcha_result' => $num1 + $num2]);
+                    // Generate kode baru agar tidak bisa dicoba-coba
+                    $newCaptcha = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 5));
+                    session(['captcha_code' => $newCaptcha]);
                 }
             }],
         ];
