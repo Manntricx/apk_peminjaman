@@ -98,10 +98,20 @@
                                 <td style="color:#7a9cc4; font-size:0.82rem;">{{ \Carbon\Carbon::parse($pj->tgl_pinjam)->format('d M Y') }}</td>
                                 <td>
                                     <div style="color:#7a9cc4; font-size:0.82rem;">{{ \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->format('d M Y') }}</div>
-                                    @if($pj->status === 'aktif' && \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->isPast())
+                                    @if($pj->status === 'aktif' && \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->startOfDay()->isPast())
+                                        @php
+                                            $tglRencana = \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->startOfDay();
+                                            $tglSkrg = now()->startOfDay();
+                                            $hariTerlambat = $tglSkrg->diffInDays($tglRencana);
+                                            if ($tglSkrg->gt($tglRencana) && $hariTerlambat == 0) $hariTerlambat = 1;
+                                        @endphp
                                         <div class="late-tag">
                                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            Terlambat!
+                                            Terlambat (Est. Denda: Rp {{ number_format($hariTerlambat * 5000, 0, ',', '.') }})
+                                        </div>
+                                    @elseif($pj->status === 'selesai' && $pj->pengembalian && $pj->pengembalian->denda > 0)
+                                        <div class="late-tag" style="color: #60a5fa;">
+                                            Denda Terbayar: Rp {{ number_format($pj->pengembalian->denda, 0, ',', '.') }}
                                         </div>
                                     @endif
                                 </td>

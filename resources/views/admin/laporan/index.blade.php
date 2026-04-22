@@ -27,8 +27,8 @@
         
         .report-stats {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
             margin-bottom: 24px;
         }
         .report-stat-item {
@@ -103,6 +103,10 @@
             <div class="report-stat-label">Menunggu Persetujuan</div>
             <div class="report-stat-value">{{ $totalPending }}</div>
         </div>
+        <div class="report-stat-item" style="border-left: 4px solid #ef4444;">
+            <div class="report-stat-label">Total Denda</div>
+            <div class="report-stat-value">Rp {{ number_format($totalDenda, 0, ',', '.') }}</div>
+        </div>
     </div>
 
     {{-- REPORT TABLE --}}
@@ -116,6 +120,7 @@
                         <th>Peminjam</th>
                         <th>Tgl Pinjam</th>
                         <th>Tgl Kembali</th>
+                        <th>Denda</th>
                         <th>Status</th>
                         <th style="padding-right: 20px;">Alat</th>
                     </tr>
@@ -131,6 +136,16 @@
                         </td>
                         <td>{{ \Carbon\Carbon::parse($pj->tgl_pinjam)->format('d/m/Y') }}</td>
                         <td>{{ \Carbon\Carbon::parse($pj->tgl_kembali_rencana)->format('d/m/Y') }}</td>
+                        <td>
+                            @if($pj->pengembalian && $pj->pengembalian->denda > 0)
+                                <div style="color: #ef4444; font-weight: 700;">Rp {{ number_format($pj->pengembalian->denda, 0, ',', '.') }}</div>
+                                <div style="font-size: 0.65rem; color: #94a3b8;">{{ $pj->pengembalian->hari_terlambat }} Hari</div>
+                            @elseif($pj->status == 'selesai')
+                                <div style="color: #10b981; font-size: 0.8rem;">-</div>
+                            @else
+                                <div style="color: #94a3b8; font-size: 0.8rem;">N/A</div>
+                            @endif
+                        </td>
                         <td>
                             @php
                                 $statusClass = match($pj->status) {

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Petugas;
 
+use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -14,7 +15,7 @@ class LaporanController extends Controller
         $endDate = $request->get('end_date', Carbon::now()->format('Y-m-d'));
         $status = $request->get('status');
 
-        $query = Peminjaman::with(['peminjam', 'petugas', 'details.alat', 'pengembalian'])
+        $query = Peminjaman::with(['peminjam', 'petugas', 'details.alat'])
             ->whereBetween('tgl_pinjam', [$startDate, $endDate]);
 
         if ($status) {
@@ -23,18 +24,14 @@ class LaporanController extends Controller
 
         $peminjamans = $query->latest()->get();
 
-        // Summary Statistics
         $totalPinjaman = $peminjamans->count();
         $totalAktif = $peminjamans->where('status', 'aktif')->count();
         $totalSelesai = $peminjamans->where('status', 'selesai')->count();
         $totalPending = $peminjamans->where('status', 'pending')->count();
-        $totalDenda = $peminjamans->sum(function($p) {
-            return $p->pengembalian ? $p->pengembalian->denda : 0;
-        });
 
-        return view('admin.laporan.index', compact(
+        return view('petugas.laporan.index', compact(
             'peminjamans', 'startDate', 'endDate', 'status',
-            'totalPinjaman', 'totalAktif', 'totalSelesai', 'totalPending', 'totalDenda'
+            'totalPinjaman', 'totalAktif', 'totalSelesai', 'totalPending'
         ));
     }
 }

@@ -10,6 +10,7 @@ use App\Models\LogAktifitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PeminjamController extends Controller
 {
@@ -156,12 +157,26 @@ class PeminjamController extends Controller
                 ->where('status', 'aktif')
                 ->findOrFail($request->peminjaman_id);
 
+            // Hitung Denda
+            $tgl_kembali_rencana = Carbon::parse($peminjaman->tgl_kembali_rencana)->startOfDay();
+            $tgl_pengembalian = Carbon::parse($request->tgl_pengembalian)->startOfDay();
+            $denda = 0;
+            $hari_terlambat = 0;
+            $tarif_denda = 5000; // Rp 5.000 per hari
+
+            if ($tgl_pengembalian->gt($tgl_kembali_rencana)) {
+                $hari_terlambat = $tgl_pengembalian->diffInDays($tgl_kembali_rencana);
+                $denda = $hari_terlambat * $tarif_denda;
+            }
+
             Pengembalian::create([
                 'peminjaman_id'   => $peminjaman->id,
                 'petugas_id'      => null, // Dikembalikan mandiri oleh peminjam
                 'tgl_pengembalian'=> $request->tgl_pengembalian,
                 'kondisi'         => $request->kondisi,
                 'catatan'         => $request->catatan,
+                'denda'           => $denda,
+                'hari_terlambat'  => $hari_terlambat,
             ]);
 
             $peminjaman->update([

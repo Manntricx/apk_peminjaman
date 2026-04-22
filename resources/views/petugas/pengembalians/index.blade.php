@@ -1,6 +1,6 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Riwayat Pengembalian</x-slot>
-    <x-slot name="pageBreadcrumb">Admin Panel / Transaksi / Pengembalian</x-slot>
+    <x-slot name="pageTitle">Riwayat Pengembalian (Petugas)</x-slot>
+    <x-slot name="pageBreadcrumb">Petugas Panel / Transaksi / Pengembalian</x-slot>
 
     <style>
         /* ============================================================
@@ -37,7 +37,6 @@
 
         .modal-accent { height: 3px; flex-shrink: 0; border-radius: 20px 20px 0 0; }
         .accent-green  { background: linear-gradient(90deg, #059669, #10b981, #34d399); }
-        .accent-blue   { background: linear-gradient(90deg, #1d4ed8, #3b82f6, #60a5fa); }
 
         .modal-header {
             padding: 20px 24px 18px;
@@ -104,6 +103,7 @@
             border-radius: 12px; padding: 16px; margin-bottom: 20px;
         }
         .info-title { font-size: 0.8rem; font-weight: 700; color: #34d399; margin-bottom: 10px; border-bottom: 1px solid rgba(16,185,129,0.15); padding-bottom: 6px; }
+
         .denda-preview { 
             margin-top: 15px; padding: 12px; border-radius: 10px;
             background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
@@ -117,11 +117,9 @@
                 <div class="card-title">Daftar Pengembalian</div>
                 <div class="card-subtitle">Riwayat alat yang sudah dikembalikan oleh peminjam</div>
             </div>
-            @if(Auth::user()->role === 'admin')
             <button onclick="openModal('createModal')" class="card-action" style="background: #16a34a; color: #fff; border:none; cursor:pointer;">
                 + Proses Pengembalian
             </button>
-            @endif
         </div>
         <div class="card-body">
             @if(session('success'))
@@ -180,7 +178,7 @@
                         </td>
                         <td style="text-align: right;">
                             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                                <a href="{{ route(Auth::user()->role . '.pengembalians.show', $pg) }}" class="topbar-icon-btn" style="width: 32px; height: 32px; background: rgba(255,255,255,0.05); color: #94a3b8;" title="Lihat Detail">
+                                <a href="{{ route('petugas.pengembalians.show', $pg) }}" class="topbar-icon-btn" style="width: 32px; height: 32px; background: rgba(255,255,255,0.05); color: #94a3b8;" title="Lihat Detail">
                                     <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
                             </div>
@@ -216,7 +214,7 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <form action="{{ route('admin.pengembalians.store') }}" method="POST" id="pengembalianForm">
+            <form action="{{ route('petugas.pengembalians.store') }}" method="POST" id="pengembalianForm">
                 @csrf
                 <div class="modal-body">
                     <div class="form-row">
@@ -290,7 +288,6 @@
         function closeModal(id) {
             document.getElementById(id).classList.remove('active');
             document.body.style.overflow = 'auto';
-            // If it was a reload modal, clear the URL query string
             if(window.location.search.includes('peminjaman_id')) {
                 window.location.href = window.location.pathname;
             }
@@ -302,7 +299,6 @@
             window.location.href = url.toString();
         }
 
-        // Live Denda Calculation
         function updateDenda() {
             const select = document.getElementById('loanSelect');
             const selectedOption = select.options[select.selectedIndex];
@@ -315,7 +311,6 @@
 
             if (!previewBox) return;
 
-            // Reset time to midnight for accurate day diff
             tglRencana.setHours(0,0,0,0);
             tglKembali.setHours(0,0,0,0);
 
@@ -331,12 +326,11 @@
             }
         }
 
-        // Attach listener if elements exist
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.querySelector('input[name="tgl_pengembalian"]');
             if (dateInput) {
                 dateInput.addEventListener('change', updateDenda);
-                updateDenda(); // Initial check
+                updateDenda();
             }
         });
 

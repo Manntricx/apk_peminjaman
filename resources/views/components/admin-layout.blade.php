@@ -82,25 +82,39 @@
         /* Brand Header */
         .sidebar-header {
             height: var(--topbar-height);
-            padding: 0 20px;
+            padding: 0 16px;
             display: flex; align-items: center; justify-content: space-between;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
+        .sidebar.collapsed .sidebar-header { padding: 0; justify-content: center; }
         .sidebar-brand {
             display: flex; align-items: center; gap: 10px;
             white-space: nowrap; overflow: hidden;
             transition: opacity 0.2s;
         }
-        .sidebar.collapsed .sidebar-brand { opacity: 0; pointer-events: none; }
-        .brand-icon {
-            width: 32px; height: 32px; border-radius: 8px;
-            background: linear-gradient(135deg, var(--blue-500), var(--blue-700));
-            display: flex; align-items: center; justify-content: center;
+        .sidebar.collapsed .sidebar-brand { opacity: 1; pointer-events: auto; justify-content: center; width: 100%; margin: 0; }
+        .sidebar.collapsed .brand-text { display: none; }
+        .brand-logo-container {
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 0;
+            overflow: hidden;
             flex-shrink: 0;
-            box-shadow: 0 4px 14px var(--glow);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
         }
-        .brand-icon svg { width: 18px; height: 18px; color: #fff; }
+        .brand-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.1);
+        }
         .brand-text { font-size: 1.2rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
         .brand-text span { color: var(--blue-400); }
 
@@ -431,21 +445,21 @@
         /* ─── LABELS ─────────────────────────────────── */
         label,
         label[style*="color"],
-        div[style*="color: #334155"],
-        div[style*="color: #475569"],
-        div[style*="color: #0f172a"],
-        span[style*="color: #334155"],
-        span[style*="color: #475569"],
-        span[style*="color: #0f172a"],
-        p[style*="color: #475569"],
-        p[style*="color: #334155"],
-        td[style*="color: #0f172a"],
-        td[style*="color: #334155"],
-        td[style*="color: #0369a1"],
-        h4[style*="color: #0369a1"],
-        tr[style*="color: #0369a1"],
-        h1[style*="color: #0f172a"],
-        h2[style*="color: #0f172a"] { color: var(--text-primary) !important; }
+        div[style*="color:#334155"], div[style*="color: #334155"],
+        div[style*="color:#475569"], div[style*="color: #475569"],
+        div[style*="color:#0f172a"], div[style*="color: #0f172a"],
+        span[style*="color:#334155"], span[style*="color: #334155"],
+        span[style*="color:#475569"], span[style*="color: #475569"],
+        span[style*="color:#0f172a"], span[style*="color: #0f172a"],
+        p[style*="color:#475569"], p[style*="color: #475569"],
+        p[style*="color:#334155"], p[style*="color: #334155"],
+        td[style*="color:#0f172a"], td[style*="color: #0f172a"],
+        td[style*="color:#334155"], td[style*="color: #334155"],
+        td[style*="color:#0369a1"], td[style*="color: #0369a1"],
+        h4[style*="color:#0369a1"], h4[style*="color: #0369a1"],
+        tr[style*="color:#0369a1"], tr[style*="color: #0369a1"],
+        h1[style*="color:#0f172a"], h1[style*="color: #0f172a"],
+        h2[style*="color:#0f172a"], h2[style*="color: #0f172a"] { color: var(--text-primary) !important; }
 
         div[style*="color: #94a3b8"],
         span[style*="color: #94a3b8"],
@@ -464,21 +478,24 @@
         span[style*="color: #0369a1"] { color: #22d3ee !important; }
 
         /* ─── LIGHT BG OVERRIDES ─────────────────────── */
-        div[style*="background: #dcfce7"], div[style*="background: #d1fae5"] {
+        div[style*="background: #dcfce7"], div[style*="background: #d1fae5"],
+        span[style*="background: #dcfce7"], span[style*="background: #d1fae5"] {
             background: rgba(16,185,129,0.1) !important;
             color: #6ee7b7 !important;
             border: 1px solid rgba(16,185,129,0.2) !important;
             border-radius: 10px !important;
         }
-        div[style*="background: #eff6ff"], div[style*="background: #dbeafe"] {
+        div[style*="background: #eff6ff"], div[style*="background: #dbeafe"],
+        span[style*="background: #eff6ff"], span[style*="background: #dbeafe"] {
             background: rgba(59,130,246,0.08) !important;
             border-color: rgba(59,130,246,0.2) !important;
         }
-        div[style*="background: #fef2f2"], div[style*="background: #fee2e2"] {
+        div[style*="background: #fef2f2"], div[style*="background: #fee2e2"],
+        span[style*="background: #fef2f2"], span[style*="background: #fee2e2"] {
             background: rgba(239,68,68,0.08) !important;
             border-color: rgba(239,68,68,0.2) !important;
         }
-        div[style*="background: #f0f9ff"] {
+        div[style*="background: #f0f9ff"], span[style*="background: #f0f9ff"] {
             background: rgba(59,130,246,0.06) !important;
             border-color: rgba(59,130,246,0.15) !important;
         }
@@ -554,8 +571,8 @@
     {{-- Header --}}
     <div class="sidebar-header">
         <div class="sidebar-brand">
-            <div class="brand-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0h-3.586a1 1 0 00-.707.293l-2.707 2.707a1 1 0 01-.707.293H10.586a1 1 0 01-.707-.293L7.172 13.293a1 1 0 00-.707-.293H3"/></svg>
+            <div class="brand-logo-container">
+                <img src="{{ asset('image/logo s.png') }}" class="brand-logo-img" alt="Logo">
             </div>
             <span class="brand-text">So<span>lang</span></span>
         </div>

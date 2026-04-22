@@ -38,16 +38,18 @@ Route::middleware('auth')->group(function () {
     // ============================================================
     Route::prefix('petugas')->name('petugas.')->middleware('role:petugas')->group(function () {
         // Menyetujui Peminjaman (list + detail + approve action)
-        Route::get('peminjamans', [\App\Http\Controllers\Admin\PeminjamanController::class, 'index'])->name('peminjamans.index');
-        Route::get('peminjamans/{peminjaman}', [\App\Http\Controllers\Admin\PeminjamanController::class, 'show'])->name('peminjamans.show');
-        Route::post('peminjamans/{peminjaman}/approve', [\App\Http\Controllers\Admin\PeminjamanController::class, 'approve'])->name('peminjamans.approve');
-        Route::post('peminjamans/{peminjaman}/reject', [\App\Http\Controllers\Admin\PeminjamanController::class, 'reject'])->name('peminjamans.reject');
-        Route::delete('peminjamans/{peminjaman}', [\App\Http\Controllers\Admin\PeminjamanController::class, 'destroy'])->name('peminjamans.destroy');
-        // Memantau Pengembalian (list + detail only)
-        Route::get('pengembalians', [\App\Http\Controllers\Admin\PengembalianController::class, 'index'])->name('pengembalians.index');
-        Route::get('pengembalians/{pengembalian}', [\App\Http\Controllers\Admin\PengembalianController::class, 'show'])->name('pengembalians.show');
+        Route::get('peminjamans', [\App\Http\Controllers\Petugas\PeminjamanController::class, 'index'])->name('peminjamans.index');
+        Route::get('peminjamans/{peminjaman}', [\App\Http\Controllers\Petugas\PeminjamanController::class, 'show'])->name('peminjamans.show');
+        Route::post('peminjamans/{peminjaman}/approve', [\App\Http\Controllers\Petugas\PeminjamanController::class, 'approve'])->name('peminjamans.approve');
+        Route::post('peminjamans/{peminjaman}/reject', [\App\Http\Controllers\Petugas\PeminjamanController::class, 'reject'])->name('peminjamans.reject');
+        
+        // Memantau Pengembalian (list + detail + process return)
+        Route::get('pengembalians', [\App\Http\Controllers\Petugas\PengembalianController::class, 'index'])->name('pengembalians.index');
+        Route::get('pengembalians/{pengembalian}', [\App\Http\Controllers\Petugas\PengembalianController::class, 'show'])->name('pengembalians.show');
+        Route::post('pengembalians', [\App\Http\Controllers\Petugas\PengembalianController::class, 'store'])->name('pengembalians.store');
+        
         // Mencetak Laporan
-        Route::get('laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan', [\App\Http\Controllers\Petugas\LaporanController::class, 'index'])->name('laporan.index');
     });
 
     // ============================================================

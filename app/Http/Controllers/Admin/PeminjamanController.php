@@ -22,7 +22,16 @@ class PeminjamanController extends Controller
         }
 
         $peminjamans = $query->latest()->paginate(10);
-        return view('admin.peminjamans.index', compact('peminjamans'));
+
+        // Data for Create Modal
+        $users = User::where('role', 'peminjam')->get();
+        $alats = Alat::where('stok_tersedia', '>', 0)->where('kondisi', 'baik')->get();
+        
+        $today = date('Ymd');
+        $count = Peminjaman::whereDate('created_at', today())->count() + 1;
+        $kode = 'PJ-' . $today . '-' . str_pad($count, 3, '0', STR_PAD_LEFT);
+
+        return view('admin.peminjamans.index', compact('peminjamans', 'users', 'alats', 'kode'));
     }
 
     public function create()

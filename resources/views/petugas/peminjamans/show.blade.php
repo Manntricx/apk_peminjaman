@@ -1,10 +1,10 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Detail Peminjaman</x-slot>
-    <x-slot name="pageBreadcrumb">Admin Panel / Transaksi / Peminjaman / Detail</x-slot>
+    <x-slot name="pageBreadcrumb">Petugas Panel / Transaksi / Peminjaman / Detail</x-slot>
 
     <div style="max-width: 900px; margin: 0 auto;">
         <div style="margin-bottom: 20px;">
-            <a href="{{ route(auth()->user()->role . '.peminjamans.index') }}" style="display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
+            <a href="{{ route('petugas.peminjamans.index') }}" style="display: inline-flex; align-items: center; gap: 8px; color: #64748b; text-decoration: none; font-size: 0.85rem; font-weight: 500;">
                 <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 Kembali ke Daftar
             </a>
@@ -48,37 +48,37 @@
             {{-- Right: Info --}}
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <div class="card">
-                    <div style="padding: 20px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+                    <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02);">
                         <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;">Nomor Transaksi</div>
-                        <div style="font-size: 1.2rem; font-weight: 800; color: #1e40af; margin-top: 4px;">{{ $peminjaman->kode_peminjaman }}</div>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: #60a5fa; margin-top: 4px;">{{ $peminjaman->kode_peminjaman }}</div>
                     </div>
                     <div style="padding: 20px;">
                         <div style="margin-bottom: 16px;">
                             <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">Peminjam:</div>
-                            <div style="font-weight: 700; color: #0f172a;">{{ $peminjaman->peminjam->name }}</div>
-                            <div style="font-size: 0.75rem; color: #64748b;">{{ $peminjaman->peminjam->email }}</div>
-                        </td>
+                            <div style="font-weight: 700; color: #f1f5f9;">{{ $peminjaman->peminjam->name }}</div>
+                            <div style="font-size: 0.75rem; color: #8ca0c4;">{{ $peminjaman->peminjam->email }}</div>
+                        </div>
                         <div style="margin-bottom: 16px;">
                             <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">Tanggal Pinjam:</div>
-                            <div style="font-weight: 600; color: #334155;">{{ \Carbon\Carbon::parse($peminjaman->tgl_pinjam)->format('d M Y') }}</div>
+                            <div style="font-weight: 600; color: #e8eeff;">{{ \Carbon\Carbon::parse($peminjaman->tgl_pinjam)->format('d M Y') }}</div>
                         </div>
                         <div style="margin-bottom: 16px;">
                             <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">Batas Kembali:</div>
-                            <div style="font-weight: 600; color: #e11d48;">{{ \Carbon\Carbon::parse($peminjaman->tgl_kembali_rencana)->format('d M Y') }}</div>
+                            <div style="font-weight: 600; color: #f87171;">{{ \Carbon\Carbon::parse($peminjaman->tgl_kembali_rencana)->format('d M Y') }}</div>
                         </div>
                         <div style="margin-bottom: 0;">
                             <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">Status:</div>
-                            <span class="badge {{ $peminjaman->status == 'aktif' ? 'badge-info' : 'badge-success' }}" style="font-size: 0.8rem; padding: 6px 14px;">
+                            <span class="badge {{ $peminjaman->status == 'aktif' ? 'badge-info' : ($peminjaman->status == 'selesai' ? 'badge-success' : 'badge-warning') }}" style="font-size: 0.8rem; padding: 6px 14px;">
                                 {{ strtoupper($peminjaman->status) }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="card" style="background: #eff6ff; border-color: #bfdbfe;">
+                <div class="card" style="background: rgba(59,130,246,0.05); border-color: rgba(59,130,246,0.15);">
                     <div style="padding: 20px;">
-                        <div style="font-size: 0.7rem; color: #1e40af; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Keterangan</div>
-                        <p style="font-size: 0.82rem; color: #1e3a8a; line-height: 1.6;">
+                        <div style="font-size: 0.7rem; color: #60a5fa; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Keterangan</div>
+                        <p style="font-size: 0.82rem; color: #8ca0c4; line-height: 1.6;">
                             {{ $peminjaman->keterangan ?: 'Tidak ada keterangan tambahan.' }}
                         </p>
                     </div>

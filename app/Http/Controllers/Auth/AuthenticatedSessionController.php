@@ -16,10 +16,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        $captcha = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 5));
-        session(['captcha_code' => $captcha]);
-
-        return view('auth.login', compact('captcha'));
+        return view('auth.login');
     }
 
     /**

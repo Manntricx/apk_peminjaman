@@ -57,6 +57,29 @@
         }
 
         .form-footer { margin-top: 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+        /* Dark Mode Select Options Fix */
+        select.form-control {
+            background-color: rgba(15, 23, 42, 0.4);
+            color: #f1f5f9;
+        }
+        select.form-control option {
+            background-color: #0d1e3b;
+            color: #f1f5f9;
+            padding: 12px;
+        }
+        
+        .form-control:focus {
+            border-color: #3b82f6;
+            background-color: rgba(15, 23, 42, 0.6);
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+        }
+
+        .form-label {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
     </style>
 
     <div class="page-hdr">

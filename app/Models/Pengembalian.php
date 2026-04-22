@@ -13,6 +13,8 @@ class Pengembalian extends Model
         'petugas_id',
         'tgl_pengembalian',
         'kondisi',
+        'denda',
+        'hari_terlambat',
         'catatan',
     ];
 

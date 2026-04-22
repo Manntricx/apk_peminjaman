@@ -86,20 +86,47 @@
             display: flex;
             justify-content: center;
             margin-bottom: 32px;
+            perspective: 1000px;
         }
 
-        .logo-box {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            border-radius: 12px;
+        .logo-wrapper {
+            position: relative;
+            width: 74px;
+            height: 74px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+            background: #000;
+            border: 1.5px solid rgba(59, 130, 246, 0.4);
+            border-radius: 18px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+            transition: all 0.5s;
+            animation: logoFloat 6s infinite ease-in-out;
         }
 
-        .logo-box svg { width: 24px; height: 24px; color: white; }
+        .main-logo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.15);
+            z-index: 2;
+        }
+
+        .logo-glow {
+            position: absolute;
+            inset: -5px;
+            background: var(--primary-glow);
+            filter: blur(20px);
+            opacity: 0.25;
+            z-index: 1;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
 
         .auth-header {
             text-align: center;
@@ -246,7 +273,16 @@
             .auth-header h2 { font-size: 1.5rem; }
             .ambient-glow { display: none; }
         }
+
+        /* reCAPTCHA centering */
+        .recaptcha-center {
+            grid-column: span 2;
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+        }
     </style>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
@@ -256,8 +292,9 @@
     <div class="auth-wrapper">
         <div class="auth-card">
             <div class="auth-logo">
-                <div class="logo-box">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                <div class="logo-wrapper">
+                    <img src="{{ asset('image/logo s.png') }}" class="main-logo" alt="Solang Logo">
+                    <div class="logo-glow"></div>
                 </div>
             </div>
 
@@ -313,6 +350,14 @@
                             <svg class="input-icon" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </div>
                     </div>
+
+                    <!-- GOOGLE reCAPTCHA -->
+                    <div class="recaptcha-center">
+                        <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site') }}" data-theme="dark"></div>
+                    </div>
+                    @error('g-recaptcha-response') 
+                        <div class="error-label" style="grid-column: span 2; text-align: center; margin-bottom: 10px;">{{ $message }}</div> 
+                    @enderror
 
                     <button type="submit" class="btn-submit">
                         <span>Daftar Akun</span>

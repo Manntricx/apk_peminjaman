@@ -12,8 +12,9 @@ class AlatController extends Controller
 {
     public function index()
     {
-        $alats = Alat::with('kategori')->latest()->paginate(10);
-        return view('admin.alats.index', compact('alats'));
+        $alats      = Alat::with('kategori')->latest()->paginate(10);
+        $categories = Category::all();
+        return view('admin.alats.index', compact('alats', 'categories'));
     }
 
     public function create()

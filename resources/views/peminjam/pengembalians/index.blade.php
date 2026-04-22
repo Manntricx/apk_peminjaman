@@ -45,6 +45,29 @@
         .badge-baik      { background: rgba(16,185,129,0.14); color: #34d399; border: 1px solid rgba(16,185,129,0.28); }
         .badge-perbaikan { background: rgba(245,158,11,0.14); color: #fbbf24; border: 1px solid rgba(245,158,11,0.28); }
         .badge-rusak     { background: rgba(239,68,68,0.14);  color: #f87171;  border: 1px solid rgba(239,68,68,0.28); }
+
+        /* Dark Mode Select Options Fix */
+        select.form-control {
+            background-color: rgba(15, 23, 42, 0.4);
+            color: #f1f5f9;
+        }
+        select.form-control option {
+            background-color: #0d1e3b;
+            color: #f1f5f9;
+            padding: 12px;
+        }
+
+        .form-control:focus {
+            border-color: #34d399;
+            background-color: rgba(15, 23, 42, 0.6);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        }
+
+        .form-label {
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
     </style>
 
     {{-- Page Header --}}

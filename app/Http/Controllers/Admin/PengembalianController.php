@@ -8,10 +8,11 @@ use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PengembalianController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $query = Pengembalian::with(['peminjaman.peminjam', 'petugas']);
         
@@ -22,7 +23,22 @@ class PengembalianController extends Controller
         }
 
         $pengembalians = $query->latest()->paginate(10);
-        return view('admin.pengembalians.index', compact('pengembalians'));
+
+        // Data for Create Modal
+        $loanQuery = Peminjaman::where('status', 'aktif');
+        if (auth()->user()->role === 'peminjam') {
+            $loanQuery->where('peminjam_id', auth()->id());
+        }
+        $activeLoans = $loanQuery->with('peminjam')->get();
+
+        // Selected loan for modal reload
+        $peminjamanId = $request->query('peminjaman_id');
+        $peminjaman = null;
+        if ($peminjamanId) {
+            $peminjaman = Peminjaman::with('details.alat')->find($peminjamanId);
+        }
+
+        return view('admin.pengembalians.index', compact('pengembalians', 'activeLoans', 'peminjaman'));
     }
 
     public function create(Request $request)
@@ -62,12 +78,26 @@ class PengembalianController extends Controller
                 throw new \Exception("Peminjaman ini sudah dikembalikan atau tidak aktif.");
             }
 
+            // Hitung Denda
+            $tgl_kembali_rencana = Carbon::parse($peminjaman->tgl_kembali_rencana)->startOfDay();
+            $tgl_pengembalian = Carbon::parse($request->tgl_pengembalian)->startOfDay();
+            $denda = 0;
+            $hari_terlambat = 0;
+            $tarif_denda = 5000; // Rp 5.000 per hari
+
+            if ($tgl_pengembalian->gt($tgl_kembali_rencana)) {
+                $hari_terlambat = $tgl_pengembalian->diffInDays($tgl_kembali_rencana);
+                $denda = $hari_terlambat * $tarif_denda;
+            }
+
             // Create Return Record
             Pengembalian::create([
                 'peminjaman_id' => $peminjaman->id,
                 'petugas_id' => auth()->id(),
                 'tgl_pengembalian' => $request->tgl_pengembalian,
                 'kondisi' => $request->kondisi,
+                'denda' => $denda,
+                'hari_terlambat' => $hari_terlambat,
                 'catatan' => $request->catatan,
             ]);
 

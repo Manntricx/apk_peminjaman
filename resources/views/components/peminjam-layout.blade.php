@@ -79,14 +79,26 @@
             display: flex; align-items: center; gap: 10px;
             text-decoration: none; flex-shrink: 0;
         }
-        .brand-icon {
-            width: 36px; height: 36px; border-radius: 10px;
-            background: linear-gradient(135deg, var(--blue-500), #1d4ed8);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 18px var(--glow);
+        .brand-logo-container {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
             flex-shrink: 0;
+            box-shadow: 0 4px 14px var(--glow);
         }
-        .brand-icon svg { width: 18px; height: 18px; color: #fff; }
+        .brand-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.1);
+        }
         .brand-name {
             font-size: 1.2rem; font-weight: 800;
             color: var(--text-primary); letter-spacing: -0.4px;
@@ -432,8 +444,8 @@
         <div class="navbar-inner">
             {{-- Brand --}}
             <a href="{{ route('peminjam.dashboard') }}" class="navbar-brand">
-                <div class="brand-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0h-3.586a1 1 0 00-.707.293l-2.707 2.707a1 1 0 01-.707.293H10.586a1 1 0 01-.707-.293L7.172 13.293a1 1 0 00-.707-.293H3"/></svg>
+                <div class="brand-logo-container">
+                    <img src="{{ asset('image/logo s.png') }}" class="brand-logo-img" alt="Logo">
                 </div>
                 <span class="brand-name">So<span>lang</span></span>
             </a>
